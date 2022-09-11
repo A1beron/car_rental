@@ -8,7 +8,7 @@ public class Main {
         var test = List.of("test", "test3", "test5");
         if (test.size() > 2) {
             System.out.println("test");
-        } else {
+        } else{
             System.out.println("test2");
         }
         System.out.println(test.get(2));
