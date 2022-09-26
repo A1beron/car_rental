@@ -28,50 +28,19 @@ public class UserDataValidatorImpl implements UserDataValidator {
         userLoginChecker = new UserService();
     }
 
-    @Override
-    public void getAndVerifyEmail(UserData userData) {
-        System.out.println("Podaj email");
-        String email = scanner.nextLine();
-        userData.setEmail(email);
-        if (!EmailValidator.getInstance().isValid(email)) {
-            System.out.println("Niepoprawny format email");
-            getAndVerifyEmail(userData);
-        }
+    public boolean isLoginValid(String login) {
+        return userLoginChecker.userLoginExist(login);
     }
 
     @Override
-    public void getAndVerifyLogin(UserData userData) {
-        System.out.println("Podaj login nowego użytkownika");
-        String login = scanner.nextLine();
-        userData.setLogin(login);
-        if (userLoginChecker.userLoginExist(login)) {
-            System.out.println("Login użytkownika już istnieje");
-            getAndVerifyLogin(userData);
-        }
+    public boolean isEmailValid(String email) {
+        return EmailValidator.getInstance().isValid(userData.getEmail());
     }
 
     @Override
-    public void getAndVerifyPostalCode(UserData userData) {
-        System.out.println("Podaj kod pocztowy");
-        String postalCode = scanner.nextLine();
-        userData.setPostalCode(postalCode);
+    public boolean isPostalCodeValid(String postalCode) {
         Pattern pattern = Pattern.compile(POSTAL_CODE_REGEX);
-        if (!pattern.matcher(postalCode).matches()) {
-            System.out.println("Niepoprawny format kodu pocztowego");
-            getAndVerifyPostalCode(userData);
-        }
-
-    }
-
-    private String getAndVerifyCity(String postalCode) {
-        Set<City> cities = cityProvider.getCityNamesFromPostalCode(postalCode);
-        if (cities.size() > 1) {
-
-        }
-        if (cities.isEmpty()) {
-            return scanner.nextLine();
-        }
-        return cities.stream().findFirst().get().getName();
+        return pattern.matcher(postalCode).matches();
     }
 
 }

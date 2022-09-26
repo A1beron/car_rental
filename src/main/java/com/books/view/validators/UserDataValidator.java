@@ -4,7 +4,10 @@ import com.books.api.user.UserData;
 
 public interface UserDataValidator {
 
-    void getAndVerifyEmail(UserData userData);
+    boolean isLoginValid(String login);
+    boolean isEmailValid(String email);
+    boolean isPostalCodeValid(String postalCode);
+
     void getAndVerifyLogin(UserData userData);
     void getAndVerifyPostalCode(UserData userData);
 
