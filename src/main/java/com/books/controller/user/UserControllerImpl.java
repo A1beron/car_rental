@@ -1,6 +1,5 @@
 package com.books.controller.user;
 
-import com.books.api.address.City;
 import com.books.api.user.UserData;
 import com.books.dao.role.RoleDao;
 import com.books.dao.role.RoleProvider;
@@ -9,14 +8,11 @@ import com.books.model.Address;
 import com.books.model.User;
 import com.books.service.city.CityByPostalCodeProvider;
 import com.books.service.city.CityService;
-import com.books.view.CityView;
 import com.books.view.TestView;
 import com.books.view.View;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 import static com.books.api.role.Roles.USER;
 
@@ -37,13 +33,8 @@ public class UserControllerImpl implements UserController {
     @Override
     public View createUser(UserData userData) {
 
-
         userDao.createUser(mapToUser(userData));
         return new TestView();
-    }
-
-    public boolean loginExist(String login) {
-        return userDao.findUserByLogin(login) != null;
     }
 
     private Address mapToAddress(UserData userData) {

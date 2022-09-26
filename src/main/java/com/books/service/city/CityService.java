@@ -22,7 +22,8 @@ public class CityService implements CityByPostalCodeProvider {
                     .build();
             HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
             ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(response.body(), new TypeReference<Set<City>>(){});
+            return objectMapper.readValue(response.body(), new TypeReference<>() {
+            });
 
         } catch (IOException | URISyntaxException | InterruptedException e) {
             e.printStackTrace();

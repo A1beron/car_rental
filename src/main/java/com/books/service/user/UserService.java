@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class UserService implements UserLoginExistChecker {
 
-    UserProvider userProvider;
+    private final UserProvider userProvider;
 
     public UserService() {
         userProvider = new UserDao();
@@ -15,9 +15,7 @@ public class UserService implements UserLoginExistChecker {
 
     @Override
     public boolean userLoginExist(String login) {
-        var test = userProvider.findUserByLogin(login);
-        var test2 = test.isPresent();
-        return test2;
+        return userProvider.findUserByLogin(login).isPresent();
     }
 
 }

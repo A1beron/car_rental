@@ -6,18 +6,17 @@ import com.books.controller.user.UserController;
 import com.books.controller.user.UserControllerImpl;
 import com.books.service.city.CityByPostalCodeProvider;
 import com.books.service.city.CityService;
-import com.books.util.DisplayUtil;
 import com.books.view.validators.UserDataValidator;
 import com.books.view.validators.UserDataValidatorImpl;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+
+import static com.books.util.DisplayUtil.canBeSelected;
+import static com.books.util.DisplayUtil.mapAndDisplay;
+import static java.util.stream.Collectors.toSet;
 
 public class CreateUserViewImpl implements View {
 
@@ -29,7 +28,7 @@ public class CreateUserViewImpl implements View {
     public CreateUserViewImpl() {
         scanner = new Scanner(System.in);
         userController = new UserControllerImpl();
-        userDataValidator = new UserDataValidatorImpl(scanner);
+        userDataValidator = new UserDataValidatorImpl();
         cityProvider = new CityService();
     }
 
@@ -64,9 +63,9 @@ public class CreateUserViewImpl implements View {
         System.out.println("Podaj ulicę");
         userData.setStreet(scanner.nextLine());
         System.out.println("Podaj numer domu");
-        userData.setStreet(scanner.nextLine());
+        userData.setBuildingNo(scanner.nextLine());
         System.out.println("Podaj numer mieszkania");
-        userData.setStreet(scanner.nextLine());
+        userData.setApartmentNo(scanner.nextLine());
         return userData;
     }
 
@@ -74,7 +73,7 @@ public class CreateUserViewImpl implements View {
         System.out.println("Podaj login nowego użytkownika");
         String login = scanner.nextLine();
         userData.setLogin(login);
-        if (userDataValidator.isLoginValid(login)) {
+        if (!userDataValidator.isLoginValid(login)) {
             System.out.println("Login użytkownika już istnieje");
             getAndVerifyLogin(userData);
         }
@@ -84,7 +83,7 @@ public class CreateUserViewImpl implements View {
         System.out.println("Podaj email");
         String email = scanner.nextLine();
         userData.setEmail(email);
-        if (userDataValidator.isEmailValid(email)) {
+        if (!userDataValidator.isEmailValid(email)) {
             System.out.println("Niepoprawny format email");
             getAndVerifyEmail(userData);
         }
@@ -94,35 +93,41 @@ public class CreateUserViewImpl implements View {
         System.out.println("Podaj kod pocztowy");
         String postalCode = scanner.nextLine();
         userData.setPostalCode(postalCode);
-        if (userDataValidator.isPostalCodeValid(postalCode)) {
-            System.out.println("Niepoprawny format kodu pocztowego");
-            getAndVerifyCity(userData);
+        if (!userDataValidator.isPostalCodeValid(postalCode)) {
+            System.out.println("Podano kod pocztowy o nieprawidłowym formacie");
+            getAndVerifyPostalCode(userData);
         }
+        getAndVerifyCity(userData);
     }
 
     private void getAndVerifyCity(UserData userData) {
         Set<City> cities = cityProvider.getCityNamesFromPostalCode(userData.getPostalCode());
+
         if (cities.isEmpty()) {
-            System.out.println("Nie znaleziono miasta dla podanego kodu pcoztowego, podaj miasto:");
-            userData.setCity(scanner.nextLine());
+            System.out.println("Podano nieistniejący kod pocztowy");
+            getAndVerifyPostalCode(userData);
+            return;
         }
-        if (cities.size() > 1) {
+        if (userDataValidator.hasMultipleCities(cities)) {
             userData.setCity(selectCity(cities));
         } else {
             userData.setCity(cities.stream().findFirst().get().getName());
         }
+        System.out.println("Wybrano miasto: " + userData.getCity());
     }
 
     private String selectCity(Set<City> cities) {
-        DisplayUtil<City> displayUtil = new DisplayUtil<>();
         System.out.println("Dla danego kodu pocztowego znaleziono wiele miast, wybierz swoje miasto:");
-        Map<String, City> mappedCities = displayUtil.mapForDisplay(cities);
-        mappedCities.forEach((integer, city) -> System.out.println(integer + ". "+city));
+        Set<String> cityNames = cities.stream()
+                .map(City::getName)
+                .collect(toSet());
+        Map<Integer, String> mappedCities = mapAndDisplay(cityNames);
         String selection = scanner.nextLine();
-        if(!mappedCities.containsKey(selection)) {
-            System.out.println("Wybrano nieprawidłową wartości");
-            selectCity(cities);
+        if (canBeSelected(mappedCities, selection)) {
+            return mappedCities.get(Integer.parseInt(selection));
         }
-        return mappedCities.get(selection).getName();
+        System.out.println("Wybrano nieprawidłową wartości");
+        return selectCity(cities);
     }
+
 }

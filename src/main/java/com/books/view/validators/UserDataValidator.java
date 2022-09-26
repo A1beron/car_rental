@@ -1,14 +1,14 @@
 package com.books.view.validators;
 
-import com.books.api.user.UserData;
+import com.books.api.address.City;
+
+import java.util.Set;
 
 public interface UserDataValidator {
 
     boolean isLoginValid(String login);
     boolean isEmailValid(String email);
     boolean isPostalCodeValid(String postalCode);
-
-    void getAndVerifyLogin(UserData userData);
-    void getAndVerifyPostalCode(UserData userData);
+    boolean hasMultipleCities(Set<City> cities);
 
 }

@@ -1,6 +1,5 @@
 package com.books.model;
 
-import com.books.api.role.Roles;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
