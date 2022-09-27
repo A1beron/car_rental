@@ -1,129 +1,137 @@
 package com.books.view;
 
 import com.books.api.address.City;
-import com.books.api.user.UserData;
-import com.books.controller.user.UserController;
-import com.books.controller.user.UserControllerImpl;
+import com.books.api.user.NewUserData;
+import com.books.controller.user.CreateUserController;
+import com.books.controller.user.CreateUserControllerImpl;
 import com.books.service.city.CityByPostalCodeProvider;
 import com.books.service.city.CityService;
+import com.books.util.DisplayUtil;
 import com.books.view.validators.UserDataValidator;
 import com.books.view.validators.UserDataValidatorImpl;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
 
-import static com.books.util.DisplayUtil.canBeSelected;
-import static com.books.util.DisplayUtil.mapAndDisplay;
-import static java.util.stream.Collectors.toSet;
+import static java.util.stream.Collectors.toList;
 
-public class CreateUserViewImpl implements View {
+public class CreateUserView implements View<NewUserData> {
 
     private Scanner scanner;
-    private UserController userController;
+    private CreateUserController createUserController;
     private UserDataValidator userDataValidator;
     private CityByPostalCodeProvider cityProvider;
 
-    public CreateUserViewImpl() {
+    public CreateUserView() {
         scanner = new Scanner(System.in);
-        userController = new UserControllerImpl();
+        createUserController = new CreateUserControllerImpl();
         userDataValidator = new UserDataValidatorImpl();
         cityProvider = new CityService();
     }
 
-    public CreateUserViewImpl(
+    public CreateUserView(
             InputStream in,
-            UserController userController,
+            CreateUserController createUserController,
             UserDataValidator userDataValidator,
             CityByPostalCodeProvider cityProvider
     ) {
         scanner = new Scanner(in);
-        this.userController = userController;
+        this.createUserController = createUserController;
         this.userDataValidator = userDataValidator;
         this.cityProvider = cityProvider;
     }
 
     @Override
     public void display() {
-        userController.createUser(createNewUser()).display();
+        createUserController.createUser(getData()).display();
     }
 
-    private UserData createNewUser() {
-        UserData userData = new UserData();
-        getAndVerifyLogin(userData);
-        getAndVerifyEmail(userData);
+    @Override
+    public NewUserData getData() {
+        return createNewUser();
+    }
+
+    private NewUserData createNewUser() {
+        NewUserData newUserData = new NewUserData();
+        getAndVerifyLogin(newUserData);
+        getAndVerifyEmail(newUserData);
         System.out.println("Podaj hasło");
-        userData.setPassword(scanner.nextLine());
+        newUserData.setPassword(scanner.nextLine());
         System.out.println("Podaj imię");
-        userData.setFirstName(scanner.nextLine());
+        newUserData.setFirstName(scanner.nextLine());
         System.out.println("Podaj nazwisko");
-        userData.setLastName(scanner.nextLine());
-        getAndVerifyPostalCode(userData);
+        newUserData.setLastName(scanner.nextLine());
+        getAndVerifyPostalCode(newUserData);
         System.out.println("Podaj ulicę");
-        userData.setStreet(scanner.nextLine());
+        newUserData.setStreet(scanner.nextLine());
         System.out.println("Podaj numer domu");
-        userData.setBuildingNo(scanner.nextLine());
+        newUserData.setBuildingNo(scanner.nextLine());
         System.out.println("Podaj numer mieszkania");
-        userData.setApartmentNo(scanner.nextLine());
-        return userData;
+        newUserData.setApartmentNo(scanner.nextLine());
+        return newUserData;
     }
 
-    public void getAndVerifyLogin(UserData userData) {
+    public void getAndVerifyLogin(NewUserData newUserData) {
         System.out.println("Podaj login nowego użytkownika");
         String login = scanner.nextLine();
-        userData.setLogin(login);
+        newUserData.setLogin(login);
         if (!userDataValidator.isLoginValid(login)) {
             System.out.println("Login użytkownika już istnieje");
-            getAndVerifyLogin(userData);
+            getAndVerifyLogin(newUserData);
         }
     }
 
-    public void getAndVerifyEmail(UserData userData) {
+    public void getAndVerifyEmail(NewUserData newUserData) {
         System.out.println("Podaj email");
         String email = scanner.nextLine();
-        userData.setEmail(email);
+        newUserData.setEmail(email);
         if (!userDataValidator.isEmailValid(email)) {
             System.out.println("Niepoprawny format email");
-            getAndVerifyEmail(userData);
+            getAndVerifyEmail(newUserData);
         }
     }
 
-    public void getAndVerifyPostalCode(UserData userData) {
+    public void getAndVerifyPostalCode(NewUserData newUserData) {
         System.out.println("Podaj kod pocztowy");
         String postalCode = scanner.nextLine();
-        userData.setPostalCode(postalCode);
+        newUserData.setPostalCode(postalCode);
         if (!userDataValidator.isPostalCodeValid(postalCode)) {
             System.out.println("Podano kod pocztowy o nieprawidłowym formacie");
-            getAndVerifyPostalCode(userData);
+            getAndVerifyPostalCode(newUserData);
         }
-        getAndVerifyCity(userData);
+        getAndVerifyCity(newUserData);
     }
 
-    private void getAndVerifyCity(UserData userData) {
-        Set<City> cities = cityProvider.getCityNamesFromPostalCode(userData.getPostalCode());
+    private void getAndVerifyCity(NewUserData newUserData) {
+        Set<City> cities = cityProvider.getCityNamesFromPostalCode(newUserData.getPostalCode());
 
         if (cities.isEmpty()) {
             System.out.println("Podano nieistniejący kod pocztowy");
-            getAndVerifyPostalCode(userData);
+            getAndVerifyPostalCode(newUserData);
             return;
         }
         if (userDataValidator.hasMultipleCities(cities)) {
-            userData.setCity(selectCity(cities));
+            newUserData.setCity(selectCity(cities));
         } else {
-            userData.setCity(cities.stream().findFirst().get().getName());
+            newUserData.setCity(cities.stream().findFirst().get().getName());
         }
-        System.out.println("Wybrano miasto: " + userData.getCity());
+        System.out.println("Wybrano miasto: " + newUserData.getCity());
     }
 
     private String selectCity(Set<City> cities) {
         System.out.println("Dla danego kodu pocztowego znaleziono wiele miast, wybierz swoje miasto:");
-        Set<String> cityNames = cities.stream()
+        List<String> cityNames = cities.stream()
                 .map(City::getName)
-                .collect(toSet());
-        Map<Integer, String> mappedCities = mapAndDisplay(cityNames);
+                .sorted()
+                .collect(toList());
+        DisplayUtil<String> displayUtil = new DisplayUtil<>();
+        Map<Integer, String> mappedCities = displayUtil.convertToMap(cityNames);
+        displayUtil.display(mappedCities);
         String selection = scanner.nextLine();
-        if (canBeSelected(mappedCities, selection)) {
+        if (displayUtil.canBeSelected(mappedCities, selection)) {
             return mappedCities.get(Integer.parseInt(selection));
         }
         System.out.println("Wybrano nieprawidłową wartości");

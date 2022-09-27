@@ -26,7 +26,7 @@ public class UserDao implements UserLoader, UserProvider {
 
     public Optional<User> findUserByLogin(String login) {
         Session session = getSessionFactory().openSession();
-        Optional<User> user = session.createQuery("select u from User u where u.login=:login", User.class)
+        Optional<User> user = session.createQuery("select u from User u join fetch u.roles where u.login=:login ", User.class)
                 .setParameter("login", login)
                 .stream()
                 .findAny();

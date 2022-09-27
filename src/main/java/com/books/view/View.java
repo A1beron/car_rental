@@ -1,7 +1,9 @@
 package com.books.view;
 
-public interface View {
+public interface View<T> {
 
     void display();
+
+    T getData();
 
 }

@@ -27,5 +27,6 @@ public class Book {
     private List<Author> authors;
     @OneToMany(mappedBy = "book")
     private List<Review> reviews;
+    private Integer amountAvailable;
 
  }

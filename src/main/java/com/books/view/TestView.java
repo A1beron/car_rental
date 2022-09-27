@@ -5,4 +5,9 @@ public class TestView implements View {
     public void display() {
         System.out.println("user created");
     }
+
+    @Override
+    public Object getData() {
+        return null;
+    }
 }
