@@ -24,7 +24,7 @@ public class MainMenuControllerImpl implements MainMenuController {
     }
 
     public Map<Integer, MenuOption> getAvailableOptions() {
-        List<MenuOption> menuOptions =menuOptionsProvider.getOptionsAvailableForTheUser();
+        List<MenuOption> menuOptions = menuOptionsProvider.getOptionsAvailableForTheUser();
         DisplayUtil<MenuOption> displayUtil = new DisplayUtil<>();
         return displayUtil.convertToMap(menuOptions);
     }
