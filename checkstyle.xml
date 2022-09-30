@@ -45,7 +45,7 @@
     <!-- See http://checkstyle.sf.net/config_javadoc.html#JavadocPackage -->
     <!-- <module name="JavadocPackage"/>
     <module name="SuppressionSingleFilter">
-      <property name="files" value="src[\\/]test[\\/].*.java"/>
+      <property name="files" value="src[\\/]getAvailibleOptions[\\/].*.java"/>
       <property name="checks" value="JavadocPackage"/>
     </module>
     <module name="SuppressionSingleFilter">
