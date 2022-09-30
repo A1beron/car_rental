@@ -35,6 +35,7 @@ public class MainMenuControllerImpl implements MainMenuController {
             switch (menuOption.get()) {
                 case LIST_BOOKS: return new BooksView();
                 case CREATE_USER: return new CreateUserView();
+                default: return new MainMenuView();
             }
         }
         return new MainMenuView();
